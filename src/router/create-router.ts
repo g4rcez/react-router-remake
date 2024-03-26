@@ -41,7 +41,7 @@ export type Links<Routes extends RoutesReadonly> = {
   [ID in Routes[number]["id"]]: Extract<Routes[number], { id: ID }>["path"];
 }
 
-type CreateRouter<Routes extends RoutesReadonly> = {
+export type CreateRouter<Routes extends RoutesReadonly> = {
   history: History;
   routes: Routes;
   links: Links<Routes>;

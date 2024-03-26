@@ -5,13 +5,14 @@ import React, {
   useLayoutEffect,
   useState,
 } from "react";
-import { CreateRouterConfig, History } from "./create-router";
+import { CreateRouter, History, Links, RoutesReadonly } from "./create-router";
 
-type Props = React.PropsWithChildren<{ config: CreateRouterConfig }>;
+type Props = React.PropsWithChildren<{ config: CreateRouter<RoutesReadonly> }>;
 
 type State = {
   outlet?: React.ReactElement;
   history: History;
+  links: Links<RoutesReadonly>;
 };
 
 // contexto aplicado para o router, permitindo compartilhar o estado
@@ -37,6 +38,8 @@ export const Outlet = (props: OutletProps) => {
 
 export const useHistory = () => useRouter().history;
 
+export const useLinks = <Route extends RoutesReadonly>() => useRouter().links as Links<Route>;
+
 export const Router = (props: Props) => {
   const config = props.config;
   const [state, setState] = useState(window.location.href);
@@ -56,6 +59,7 @@ export const Router = (props: Props) => {
     // <id:string> -> ajuda na tipagem e trás mais explicito a intenção de uso
     // /:id -> tudo é string
     outlet: config.routes.find((route) => route.path === url.pathname)?.element,
+    links: config.links
   };
 
   return <context.Provider value={value}>{props.children}</context.Provider>;

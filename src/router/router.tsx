@@ -24,9 +24,14 @@ export const useRouter = () => {
   return ctx;
 };
 
-export const Outlet = () => {
+type OutletProps = {
+  notFound?: React.ReactElement;
+}
+
+export const Outlet = (props: OutletProps) => {
   const router = useRouter();
   if (router.outlet) return <Fragment>{router.outlet}</Fragment>;
+  if (props.notFound) return props.notFound;
   return null;
 };
 

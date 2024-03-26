@@ -35,7 +35,7 @@ export class History {
   }
 }
 
-export const createRouter = <T extends readonly RouteConfig[]>(routes: T) => {
+export const createRouter = <const T extends readonly RouteConfig[]>(routes: T) => {
   const history = new History(window.history);
   return { history, routes };
 };

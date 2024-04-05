@@ -3,7 +3,9 @@ import React from "react";
 type Listener = (url: string) => void;
 
 export class History {
-  public constructor(private h: globalThis.History) {}
+  public constructor(private h: globalThis.History) {
+  }
+
   public listeners: Set<Listener> = new Set();
 
   private callListeners() {
@@ -23,8 +25,8 @@ export class History {
   }
 
   public push(url: string, state?: object) {
-    this.callListeners();
     this.h.pushState(state || {}, "", url);
+    this.callListeners();
     console.log("PUSH ->", url);
   }
 }
@@ -49,7 +51,7 @@ export type CreateRouter<Routes extends RoutesReadonly> = {
 
 export const createRouter = <const Routes extends RoutesReadonly>(routes: Routes): CreateRouter<Routes> => {
   const history = new History(window.history);
-  
+
   const links = routes.reduce((acc, route) => ({ ...acc, [route.id]: route.path }), {} as Links<Routes>);
 
   return { history, routes, links };

@@ -1,6 +1,6 @@
 import React, { Fragment, useLayoutEffect, useState } from "react";
 import { CreateRouter, RoutesReadonly } from "./create-router";
-import { context, useRouter } from "./hook.ts";
+import { context, RouterContext, useRouter } from "./hook.ts";
 
 type Props = React.PropsWithChildren<{ config: CreateRouter<RoutesReadonly> }>;
 
@@ -27,8 +27,10 @@ export const Router = (props: Props) => {
 
   const url = new URL(state, "http://localhost");
 
-  const value = {
+  const value: RouterContext = {
     history: config.history,
+    href: config.href,
+    pathname: config.pathname,
     // aqui vai precisar aplicar a lógica para pegar paths dinâmicos de acordo
     // com a regex fornecida na string. Escolher o padrão /users/<id:string> ou /users/:id
     // <id:string> -> ajuda na tipagem e trás mais explicito a intenção de uso

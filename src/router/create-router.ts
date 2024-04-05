@@ -46,6 +46,8 @@ export type Links<Routes extends RoutesReadonly> = {
 export type CreateRouter<Routes extends RoutesReadonly> = {
   history: History;
   routes: Routes;
+  pathname: string;
+  href: string;
   links: Links<Routes>;
 }
 
@@ -53,6 +55,7 @@ export const createRouter = <const Routes extends RoutesReadonly>(routes: Routes
   const history = new History(window.history);
 
   const links = routes.reduce((acc, route) => ({ ...acc, [route.id]: route.path }), {} as Links<Routes>);
+  const location = window.location;
 
-  return { history, routes, links };
+  return { history, routes, links, href: location.href, pathname: location.pathname };
 };

@@ -1,29 +1,8 @@
-import React, {
-  Fragment,
-  createContext,
-  useContext,
-  useLayoutEffect,
-  useState,
-} from "react";
-import { CreateRouter, History, Links, RoutesReadonly } from "./create-router";
+import React, { Fragment, useLayoutEffect, useState } from "react";
+import { CreateRouter, RoutesReadonly } from "./create-router";
+import { context, useRouter } from "./hook.ts";
 
 type Props = React.PropsWithChildren<{ config: CreateRouter<RoutesReadonly> }>;
-
-type State = {
-  outlet?: React.ReactElement;
-  history: History;
-  links: Links<RoutesReadonly>;
-};
-
-// contexto aplicado para o router, permitindo compartilhar o estado
-// com todos os hooks e componentes filhos do router
-const context = createContext<State | undefined>(undefined);
-
-export const useRouter = () => {
-  const ctx = useContext(context);
-  if (ctx === undefined) throw new Error("Context need the correct value");
-  return ctx;
-};
 
 type OutletProps = {
   notFound?: React.ReactElement;
@@ -35,10 +14,6 @@ export const Outlet = (props: OutletProps) => {
   if (props.notFound) return props.notFound;
   return null;
 };
-
-export const useHistory = () => useRouter().history;
-
-export const useLinks = <Route extends RoutesReadonly>() => useRouter().links as Links<Route>;
 
 export const Router = (props: Props) => {
   const config = props.config;

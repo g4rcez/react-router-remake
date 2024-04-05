@@ -1,9 +1,9 @@
-import { useEffect } from "react";
-import { Outlet, useHistory } from "./router/router";
+import { Outlet } from "./router/router";
+import { useHistory } from "./router/hook.ts";
 
 const NotFound = () => (
   <h1>Página não encontrada</h1>
-)
+);
 
 export default function App() {
   const router = useHistory();

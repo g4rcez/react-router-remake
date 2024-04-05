@@ -1,11 +1,5 @@
 import React from "react";
 
-type RouteConfig = {
-  id: string;
-  path: `/${string}`;
-  element: React.ReactElement;
-} & Partial<{}>;
-
 type Listener = (url: string) => void;
 
 export class History {
@@ -35,9 +29,28 @@ export class History {
   }
 }
 
-export const createRouter = <T extends readonly RouteConfig[]>(routes: T) => {
-  const history = new History(window.history);
-  return { history, routes };
+type Route = {
+  id: string;
+  path: `/${string}`;
+  element: React.ReactElement;
 };
 
-export type CreateRouterConfig = ReturnType<typeof createRouter>;
+export type RoutesReadonly = readonly Route[];
+
+export type Links<Routes extends RoutesReadonly> = {
+  [ID in Routes[number]["id"]]: Extract<Routes[number], { id: ID }>["path"];
+}
+
+export type CreateRouter<Routes extends RoutesReadonly> = {
+  history: History;
+  routes: Routes;
+  links: Links<Routes>;
+}
+
+export const createRouter = <const Routes extends RoutesReadonly>(routes: Routes): CreateRouter<Routes> => {
+  const history = new History(window.history);
+  
+  const links = routes.reduce((acc, route) => ({ ...acc, [route.id]: route.path }), {} as Links<Routes>);
+
+  return { history, routes, links };
+};

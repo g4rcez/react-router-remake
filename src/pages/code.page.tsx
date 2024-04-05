@@ -1,3 +1,14 @@
+import { routes } from "../links";
+import { Link } from "../router/link";
+import { useLinks } from "../router/router";
+
 export default function CodePage() {
-    return <h1>Eu sou a página code</h1>
+  const links = useLinks<typeof routes.routes>();
+
+  return (
+    <section>
+      <h1>Eu sou a página Code Challenge</h1>
+      <Link href={links.index}>Ir para Index</Link>
+    </section>
+  );
 }

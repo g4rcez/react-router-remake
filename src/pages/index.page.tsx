@@ -6,6 +6,8 @@ export default function IndexPage() {
     <section>
       <h1>Eu sou a página index</h1>
       <Link href={routes.links.code}>Ir para Code Challenge</Link>
+      <Link href="https://www.google.com.br">Ir para o Google</Link>
+      <Link href={routes.links.index}>Permanecer na página</Link>
     </section>
   );
 }

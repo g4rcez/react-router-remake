@@ -15,6 +15,8 @@ export const Outlet = (props: OutletProps) => {
   return null;
 };
 
+export const useHistory = () => useRouter().history;
+
 export const Router = (props: Props) => {
   const config = props.config;
   const [state, setState] = useState(window.location.href);
@@ -35,7 +37,9 @@ export const Router = (props: Props) => {
     // com a regex fornecida na string. Escolher o padrão /users/<id:string> ou /users/:id
     // <id:string> -> ajuda na tipagem e trás mais explicito a intenção de uso
     // /:id -> tudo é string
-    outlet: config.routes.find((route) => route.path === url.pathname)?.element,
+    outlet: config.routes.find((route) => {
+      route.path === url.pathname
+    })?.element,
     links: config.links
   };
 

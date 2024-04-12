@@ -49,13 +49,13 @@ export type CreateRouter<Routes extends RoutesReadonly> = {
   pathname: string;
   href: string;
   links: Links<Routes>;
+  useLinks: () => Links<Routes>
 }
 
 export const createRouter = <const Routes extends RoutesReadonly>(routes: Routes): CreateRouter<Routes> => {
   const history = new History(window.history);
-
   const links = routes.reduce((acc, route) => ({ ...acc, [route.id]: route.path }), {} as Links<Routes>);
   const location = window.location;
-
-  return { history, routes, links, href: location.href, pathname: location.pathname };
+  const useLinks = () => links;
+  return { history, useLinks, routes, links, href: location.href, pathname: location.pathname };
 };

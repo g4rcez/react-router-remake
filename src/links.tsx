@@ -15,4 +15,6 @@ export const routes = createRouter([
   },
 ]);
 
+export const useLinks = routes.useLinks
+
 console.log(routes.links.code) // Output: "/code-challenge"

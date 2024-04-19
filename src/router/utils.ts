@@ -1,0 +1,49 @@
+import { Strings, Merge } from "./types";
+
+const regex = /(<\w+:(\w+)>)/gm;
+
+const captureGroupMap: Record<string, string> = {
+  string: "[^/:]",
+  number: "[0-9]"
+};
+
+export const createUrlPatternMatch = <U extends string>(url: U): RegExp => {
+  const stringRegExp = url.replace(regex, (capture) => {
+    const sanitized = capture.replace("<", "").replace(">", "").replace(":", "___");
+    const captured = sanitized.split("___")[1]!;
+    const parser = captureGroupMap[captured] || captureGroupMap.string;
+    return `(?<${sanitized.replace(/^:/g, "")}>${parser}+)`;
+  });
+  return new RegExp(`^(${stringRegExp})$`, "gm");
+};
+
+type ParseMap = {
+  string: string;
+  number: number;
+};
+
+type ParseParams<T extends string[]> = T extends [infer F, ...infer Rest]
+  ? F extends string
+    ? Strings.Contains<F, ":"> extends true
+      ? {
+          [K in Strings.Replace<Strings.Split<F, ":">[0], "<", "">]: Strings.Replace<
+            NonNullable<Strings.Split<F, ":">[1]>,
+            ">",
+            ""
+          > extends `${infer R}`
+            ? R extends keyof ParseMap
+              ? ParseMap[R]
+              : never
+            : never;
+        } & (Rest extends string[] ? ParseParams<Rest> : {})
+      : Rest extends string[]
+      ? ParseParams<Rest>
+      : {}
+    : {}
+  : {};
+
+export type ParseUrlPaths<T extends string> = Strings.Contains<T, "<"> extends true
+  ? Strings.Contains<T, ">"> extends true
+    ? Merge<ParseParams<Strings.Split<T, "/">>>
+    : {}
+  : {};

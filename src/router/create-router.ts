@@ -3,8 +3,7 @@ import React from "react";
 type Listener = (url: string) => void;
 
 export class History {
-  public constructor(private h: globalThis.History) {
-  }
+  public constructor(private h: globalThis.History) {}
 
   public listeners: Set<Listener> = new Set();
 
@@ -31,7 +30,7 @@ export class History {
   }
 }
 
-type Route = {
+export type Route = {
   id: string;
   path: `/${string}`;
   element: React.ReactElement;
@@ -41,21 +40,32 @@ export type RoutesReadonly = readonly Route[];
 
 export type Links<Routes extends RoutesReadonly> = {
   [ID in Routes[number]["id"]]: Extract<Routes[number], { id: ID }>["path"];
-}
+};
 
-export type CreateRouter<Routes extends RoutesReadonly> = {
+export type Config = Partial<{
+  pathsParser: Partial<{
+    match: Record<string, string>;
+    map: Record<string, (str: string) => any>;
+  }>;
+}>;
+
+export type CreateRouter<Routes extends RoutesReadonly, C extends Config> = {
+  config?: C;
   history: History;
   routes: Routes;
   pathname: string;
   href: string;
   links: Links<Routes>;
-  useLinks: () => Links<Routes>
-}
+  useLinks: () => Links<Routes>;
+};
 
-export const createRouter = <const Routes extends RoutesReadonly>(routes: Routes): CreateRouter<Routes> => {
+export const createRouter = <const Routes extends RoutesReadonly, C extends Config>(
+  routes: Routes,
+  config?: C
+): CreateRouter<Routes, Config> => {
   const history = new History(window.history);
   const links = routes.reduce((acc, route) => ({ ...acc, [route.id]: route.path }), {} as Links<Routes>);
   const location = window.location;
   const useLinks = () => links;
-  return { history, useLinks, routes, links, href: location.href, pathname: location.pathname };
+  return { history, useLinks, routes, links, href: location.href, pathname: location.pathname, config };
 };

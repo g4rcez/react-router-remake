@@ -28,7 +28,7 @@ export const routes = createRouter(
     {
       element: <UserPage />,
       id: "userAddressId",
-      path: "/users/<uuid:string>/address/<id:class>"
+      path: "/users/<uuid:string>/address/<id:number>"
     }
   ],
   {

@@ -1,10 +1,8 @@
-import { routes } from "../links";
+import { useLinks } from "../links";
 import { Link } from "../router/link";
-import { useLinks } from "../router/hook.ts";
 
 export default function CodePage() {
-  const links = useLinks<typeof routes.routes>();
-
+  const links = useLinks();
   return (
     <section>
       <h1>Eu sou a página Code Challenge</h1>

@@ -1,3 +1,4 @@
+import { Config } from "./create-router";
 import { Strings, Merge } from "./types";
 
 const regex = /(<\w+:(\w+)>)/gm;
@@ -7,20 +8,24 @@ const captureGroupMap: Record<string, string> = {
   number: "[0-9]"
 };
 
-export const createUrlPatternMatch = <U extends string>(url: U): RegExp => {
+export const parseGroupMap: Record<string, (a: string) => any> = {
+  string: (str: string) => `${str}`,
+  default: (str: string) => `${str}`,
+  number: (str: string) => Number(str)
+};
+
+export const createUrlPatternMatch = <U extends string>(url: U, config?: Config): RegExp => {
+  const captureGroup = { ...captureGroupMap, ...config?.pathsParser?.match };
   const stringRegExp = url.replace(regex, (capture) => {
     const sanitized = capture.replace("<", "").replace(">", "").replace(":", "___");
     const captured = sanitized.split("___")[1]!;
-    const parser = captureGroupMap[captured] || captureGroupMap.string;
+    const parser = captureGroup[captured] || captureGroupMap.string;
     return `(?<${sanitized.replace(/^:/g, "")}>${parser}+)`;
   });
   return new RegExp(`^(${stringRegExp})$`, "gm");
 };
 
-type ParseMap = {
-  string: string;
-  number: number;
-};
+type ParseMap = { string: string; number: number };
 
 type ParseParams<T extends string[]> = T extends [infer F, ...infer Rest]
   ? F extends string

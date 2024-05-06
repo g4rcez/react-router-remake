@@ -1,12 +1,13 @@
-import React, { Fragment, useLayoutEffect, useState } from "react";
-import { CreateRouter, RoutesReadonly } from "./create-router";
+import React, { Fragment, useLayoutEffect, useMemo, useState } from "react";
+import { Config, CreateRouter, Route, RoutesReadonly } from "./create-router";
 import { context, RouterContext, useRouter } from "./hook.ts";
+import { createUrlPatternMatch, parseGroupMap, ParseUrlPaths } from "./utils.ts";
 
-type Props = React.PropsWithChildren<{ config: CreateRouter<RoutesReadonly> }>;
+type Props = React.PropsWithChildren<{ config: CreateRouter<RoutesReadonly, Config> }>;
 
 type OutletProps = {
   notFound?: React.ReactElement;
-}
+};
 
 export const Outlet = (props: OutletProps) => {
   const router = useRouter();
@@ -15,8 +16,33 @@ export const Outlet = (props: OutletProps) => {
   return null;
 };
 
+export const useHistory = () => useRouter().history;
+
+const parsePaths = (route: Route, pathname: string, config?: Config) => {
+  const r = createUrlPatternMatch(route.path, config).exec(pathname);
+  if (!r) return {};
+  const group = { ...parseGroupMap, ...config?.pathsParser?.map };
+  return Object.entries(r.groups || {}).reduce((acc, [key, value]) => {
+    const [name, type] = key.split("___");
+    const fn = group[type] || parseGroupMap.default;
+    const val = fn(value);
+    return { ...acc, [name]: val };
+  }, {});
+};
+
+export const usePaths = <T extends string>(_?: T): ParseUrlPaths<T> => {
+  const router = useRouter();
+  const outlet = router.page;
+  const config = router.config;
+  return useMemo(
+    () => (outlet ? parsePaths(outlet, router.pathname, config) : {}),
+    [outlet, router.pathname, config]
+  ) as ParseUrlPaths<T>;
+};
+
 export const Router = (props: Props) => {
   const config = props.config;
+  const userConfig = props.config.config;
   const [state, setState] = useState(window.location.href);
 
   // useLayoutEffect para rodar antes da renderização dos elementos
@@ -27,15 +53,15 @@ export const Router = (props: Props) => {
 
   const url = new URL(state, "http://localhost");
 
+  const outlet = config.routes.find((route) => createUrlPatternMatch(route.path).test(url.pathname));
+
   const value: RouterContext = {
+    config: userConfig,
     history: config.history,
     href: config.href,
     pathname: config.pathname,
-    // aqui vai precisar aplicar a lógica para pegar paths dinâmicos de acordo
-    // com a regex fornecida na string. Escolher o padrão /users/<id:string> ou /users/:id
-    // <id:string> -> ajuda na tipagem e trás mais explicito a intenção de uso
-    // /:id -> tudo é string
-    outlet: config.routes.find((route) => route.path === url.pathname)?.element,
+    outlet: outlet?.element,
+    page: outlet,
     links: config.links
   };
 

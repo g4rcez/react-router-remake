@@ -1,5 +1,5 @@
 import { Config } from "./create-router";
-import { Strings, Merge } from "./types";
+import { Strings, Merge, RouterUtils } from "./types";
 
 const regex = /(<\w+:(\w+)>)/gm;
 
@@ -25,8 +25,6 @@ export const createUrlPatternMatch = <U extends string>(url: U, config?: Config)
   return new RegExp(`^(${stringRegExp})$`, "gm");
 };
 
-type ParseMap = { string: string; number: number };
-
 type ParseParams<T extends string[]> = T extends [infer F, ...infer Rest]
   ? F extends string
     ? Strings.Contains<F, ":"> extends true
@@ -36,19 +34,21 @@ type ParseParams<T extends string[]> = T extends [infer F, ...infer Rest]
             ">",
             ""
           > extends `${infer R}`
-            ? R extends keyof ParseMap
-              ? ParseMap[R]
+            ? R extends keyof RouterUtils.ParseValue
+              ? RouterUtils.ParseValue[R]
               : never
             : never;
         } & (Rest extends string[] ? ParseParams<Rest> : {})
       : Rest extends string[]
-      ? ParseParams<Rest>
-      : {}
+        ? ParseParams<Rest>
+        : {}
     : {}
   : {};
 
-export type ParseUrlPaths<T extends string> = Strings.Contains<T, "<"> extends true
-  ? Strings.Contains<T, ">"> extends true
-    ? Merge<ParseParams<Strings.Split<T, "/">>>
-    : {}
-  : {};
+export type ParseUrlPaths<T extends string> =
+  Strings.Contains<T, "<"> extends true
+    ? Strings.Contains<T, ">"> extends true
+      ? Merge<ParseParams<Strings.Split<T, "/">>>
+      : {}
+    : {};
+

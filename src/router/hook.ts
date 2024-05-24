@@ -3,7 +3,6 @@ import { Config, History, Links, Route, RoutesReadonly } from "./create-router.t
 
 // contexto aplicado para o router, permitindo compartilhar o estado
 // com todos os hooks e componentes filhos do router
-
 export type RouterContext = {
   config?: Config;
   history: History;
@@ -12,6 +11,7 @@ export type RouterContext = {
   outlet?: React.ReactElement;
   page?: Route;
   pathname: string;
+  query: Partial<Record<string, unknown>>;
 };
 
 export const context = createContext<RouterContext | undefined>(undefined);

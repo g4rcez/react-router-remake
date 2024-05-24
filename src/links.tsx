@@ -23,7 +23,7 @@ export const routes = createRouter(
     {
       element: <UserPage />,
       id: "userId",
-      path: "/users/<uuid:string>"
+      path: "/users/<uuid:string>?query=string&id=number"
     },
     {
       element: <UserPage />,

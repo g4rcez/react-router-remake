@@ -1,6 +1,7 @@
 import { AnchorHTMLAttributes, MouseEvent } from "react";
 import { useHistory, useLocation } from "./hook.ts";
 import { ParseUrlPaths } from "./utils.ts";
+import { Strings, QueryString } from "./types.ts";
 
 type CreatePath<Path extends string> = Path extends `${string}/<${string}:${string}>`
   ? {
@@ -12,17 +13,29 @@ type CreatePath<Path extends string> = Path extends `${string}/<${string}:${stri
 
 export type LinkProps<Path extends string> = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href"> & {
   href: Path;
-} & CreatePath<Path>;
+  query?: QueryString.Parse<Path>;
+} & CreatePath<Strings.Split<Path, "?">[0]>;
 
 const isExternalLink = (href: string) => /https?:\/\//.test(href);
 
-const transformUrl = <Path extends string>(href: string, params?: ParseUrlPaths<Path>) => {
+const regex = /(<(\w+):\w+>)/gm;
+const transformUrl = <Path extends string>(
+  href: string,
+  params: ParseUrlPaths<Path> | undefined,
+  query: QueryString.Parse<Path> | undefined
+) => {
   if (!params) return href;
-
-  return Object.entries(params).reduce((acc, [key, value]) => {
-    const paramsRegex = new RegExp(`<${key}:\\w+>`, "g");
-    return acc.replace(paramsRegex, value as string);
-  }, href);
+  const pathname = href.replace(regex, (_, __, param) => {
+    if (params) return (params as any)[param];
+    return "";
+  });
+  const url = new URL(pathname, "http://localhost");
+  if (!!query) {
+    Object.entries(query).forEach(([key, value]) => {
+      url.searchParams.set(key, `${value}`);
+    });
+  }
+  return `${url.pathname}${url.search}`;
 };
 
 export const Link = <Path extends string>(props: LinkProps<Path>) => {
@@ -31,7 +44,7 @@ export const Link = <Path extends string>(props: LinkProps<Path>) => {
 
   const isExternal = isExternalLink(props.href);
 
-  const _href = isExternal ? props.href : transformUrl(props.href, props.params);
+  const _href = isExternal ? props.href : transformUrl(props.href, props.params as never, props.query);
 
   const onClick = (e: MouseEvent<HTMLAnchorElement> | undefined) => {
     if (!_href) return;
